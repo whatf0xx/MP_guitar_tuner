@@ -10,8 +10,6 @@ psect	udata_acs   ; reserve data space in access ram
 	raw_store    EQU 0x100
 	counter:    ds 1
     
-psect	udata_bank4 ; reserve data anywhere in RAM (here at 0x400)
-    
 psect	code, abs	
 rst: 	org 0x0
  	goto	setup
@@ -37,5 +35,7 @@ loop:
 	
 	decfsz	counter
 	bra loop
+	
+	goto $
 	
 	end	rst
