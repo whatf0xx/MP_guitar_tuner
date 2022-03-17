@@ -38,3 +38,9 @@ ax = plt.axes()
 ax.plot(t_estimate, combined_data)
 ax.set_xlabel("Time (ms)")
 ax.set_ylabel("Amplitude (a.u.)")
+
+from scipy.fftpack import fft, fftshift
+
+fft_data = fftshift(fft(combined_data))
+plt.figure()
+plt.plot(abs(fft_data))
