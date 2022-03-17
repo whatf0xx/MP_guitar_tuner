@@ -1,6 +1,6 @@
 #include <xc.inc>
 
-global time_counter, gone_high, low_byte_thrsh, high_byte_thrsh
+global timer_flag, time_counter, low_byte_thrsh, high_byte_thrsh
 global timing_setup, is_high, is_low
     
 psect timing_vars, class=DATA
@@ -8,10 +8,10 @@ psect timing_vars, class=DATA
     ; These are for the timing-loop process
     
 	raw_end	    EQU 0x2ff
-	time_counter:	ds 1
-	gone_high:	ds 1
-	low_byte_thrsh:	ds 1
-	high_byte_thrsh: ds 1
+	timer_flag:	    ds 1
+	time_counter:	    ds 1
+	low_byte_thrsh:	    ds 1
+	high_byte_thrsh:    ds 1
         
 psect timing_code, class=CODE
 
