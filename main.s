@@ -61,6 +61,14 @@ loop:
 	movlw	0xD0
 	movwf	POSTDEC0, A
 	
+	call	LCD_clear
+	
+	movlw	1
+	call	LCD_delay_ms
+	
+	movf	time_counter, W, A
+	call	LCD_Write_Hex_orig
+	
 	goto $
 	
 	end	rst

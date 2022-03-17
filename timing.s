@@ -25,6 +25,7 @@ timing_setup:
 	
 	movlw	0
 	movwf	timer_flag, A
+	movwf	time_counter, A
 	
 	lfsr	0, raw_end		;start from the end
 	
