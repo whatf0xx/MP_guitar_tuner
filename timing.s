@@ -23,56 +23,57 @@ timing_setup:
 	movlw	0x03			;high byte threshold
 	movwf   high_byte_thrsh, A
 	
-	lfsr	0, raw_end		;start from the beginning again
+	movlw	0
+	movwf	timer_flag, A
 	
-is_low:	
-	;takes FSR0 and decrements through register, stops when signal is low.
+	lfsr	0, raw_end		;start from the end
 	
-	movf	POSTDEC0, W, A		;put the final high byte to W
-	CPFSLT	high_byte_thrsh, A	;skip if point > threshold
-	
-	bra	eq1			;point <= threshold
-	
-	decf	FSR0, A			;point is still high, start the loop
-	bra	is_low			;again, increment memory
-eq1:
-	CPFSEQ	high_byte_thrsh, A	;skip if equal to
-	bra	fancy_return1
-	bra	check_low_byte_low
-
-fancy_return1:	
-	decf	FSR0, A
-	return				;if not equal to must be lower, return
-		
-check_low_byte_low:
-					
-	movf	POSTDEC0, W, A		;high byte is low, is the low byte?
-	CPFSLT	low_byte_thrsh, A	;skip if point > threshold
 	return
-	bra	is_low
+	
+is_low:
+	movf	POSTDEC0, W, A		;high byte to W
+	cpfslt	high_byte_thrsh, A	;is W > f?
+	bra	check_eq1		;NO, check equality
+	decf	FSR0, A			;YES, look at next high byte
+	tstfsz	timer_flag, A		;increment timer?
+	incf	time_counter, A		;if timer_flag is high, count timestep
+	bra	is_low			;loop
+	
+check_eq1:
+	cpfsgt	high_byte_thrsh, A	;is W < f?
+	bra	check_low1		;it's equal - check the low byte
+	decf	FSR0, A			;it's lower - leave the loop
+	return
+	
+check_low1:
+	movf	POSTDEC0, W, A		;low byte to W
+	cpfslt	low_byte_thrsh, A	;is W > f?
+	return				;NO, finish loop
+	tstfsz	timer_flag, A		;YES, increment timer?
+	incf	time_counter, A		;if timer_flag is high, count timestep
+	bra	is_low			;loop
 	
 is_high:
-	;takes FSR0 and decrements through register, stops when signal is high.
+	movf	POSTDEC0, W, A		;high byte to W
+	cpfsgt	high_byte_thrsh, A	;is W < f?
+	bra	check_eq2		;NO, check equality
+	decf	FSR0, A			;YES, look at next high byte
+	tstfsz	timer_flag, A		;increment timer?
+	incf	time_counter, A		;if timer_flag is high, count timestep
+	bra	is_high			;loop
 	
-	movf	POSTDEC0, W, A		;put the final high byte to W
-	CPFSGT	high_byte_thrsh, A	;skip if point < threshold
-	
-	bra	eq2			;point >= threshold
-	
-	decf	FSR0, A			;point is still low, start loop again,
-	bra	is_high			;increment memory
-	
-eq2:
-	CPFSEQ	high_byte_thrsh, A	;skip if equal to
-	bra	fancy_return2
-	bra	check_low_byte_high
-
-fancy_return2:	
-	decf	FSR0, A
-	return				;if not equal to must be higher, return
-	
-check_low_byte_high:
-	movf	POSTDEC0, W, A		;high byte is low, is the low byte?
-	CPFSGT	low_byte_thrsh, A	;skip if point < threshold
+check_eq2:
+	cpfslt	high_byte_thrsh, A	;is W < f?
+	bra	check_low2		;it's equal - check the low byte
+	decf	FSR0, A			;it's higher - leave the loop
 	return
-	bra	is_high
+	
+check_low2:
+	movf	POSTDEC0, W, A		;low byte to W
+	cpfsgt	low_byte_thrsh, A	;is W < f?
+	return				;NO, finish loop
+	tstfsz	timer_flag, A		;YES, increment timer?
+	incf	time_counter, A		;if timer_flag is high, count timestep
+	bra	is_high			;loop
+	
+end

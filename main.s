@@ -36,18 +36,30 @@ loop:
 	movff	ADRESH, POSTINC0, A	;high bit to RAM, increment FSR0
 	
 	decfsz	counter
-	bra loop
+	bra	loop
 	
-	call timing_setup
+	call	timing_setup
 	
-	call is_low
-	call is_high
+	call	is_low
+	call	is_high
 	
-	movlw 0x07
-	movwf POSTDEC0, A
+	movlw	0x07
+	movwf	POSTDEC0, A
 	
-	movlw 0xD0
-	movwf POSTDEC0, A
+	movlw	0xD0
+	movwf	POSTDEC0, A
+	
+	movlw	1
+	movwf	timer_flag, A
+	
+	call	is_low
+	call	is_high
+	
+	movlw	0x07
+	movwf	POSTDEC0, A
+	
+	movlw	0xD0
+	movwf	POSTDEC0, A
 	
 	goto $
 	
