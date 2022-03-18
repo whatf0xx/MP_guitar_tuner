@@ -9,10 +9,15 @@ extrn	timing_setup, is_low, is_high
 	
 psect	udata_acs   ; reserve data space in access ram
 	
-	raw_store    EQU 0x100
-	counter:    ds 1
+	raw_store	EQU 0x100
+	counter:	ds 1
+	div_co_low:	ds 1
+	div_co_mid:	ds 1
+	div_co_high:	ds 1
+	delta_t:	ds 1
     
-psect	code, abs	
+psect	code, abs
+	
 rst: 	org 0x0
  	goto	setup
 
@@ -20,15 +25,24 @@ rst: 	org 0x0
 setup:	
 	call	LCD_Setup	; setup LCD
 	call	ADC_Setup	; setup ADC
+
+	movlw	0
+	movwf	div_co_low, A	;start variable from 0 each run
+	movwf	div_co_mid, A
+	movwf	div_co_high, A
+	
+	movlw	1
+	movwf	delta_t, A	;1/4th the delay
+	
 	goto	start
 	
 	; ******* Main programme ****************************************
 start:
 	lfsr	0, raw_store	    ;store bits of raw data
     
-loop:
+meas_loop:
 	
-	movlw	1
+	movf	delta_t, W, A	    ;take a measurement every delta_t x4us
 	call	LCD_delay_x4us
 	
 	call	ADC_Read
@@ -36,38 +50,30 @@ loop:
 	movff	ADRESH, POSTINC0, A	;high bit to RAM, increment FSR0
 	
 	decfsz	counter
-	bra	loop
+	bra	meas_loop
 	
 	call	timing_setup
 	
-	call	is_low
-	call	is_high
+	call	is_low			;get to a good point to start timing
+	call	is_high			;start with the signal high
 	
-	movlw	0x07
-	movwf	POSTDEC0, A
-	
-	movlw	0xD0
-	movwf	POSTDEC0, A
 	
 	movlw	1
-	movwf	timer_flag, A
+	movwf	timer_flag, A		;start timing
 	
-	call	is_low
-	call	is_high
+	call	is_low			;timer increments on each loop
+	call	is_high			;finish when the timer goes high again
 	
-	movlw	0x07
-	movwf	POSTDEC0, A
+Div_loop:
 	
-	movlw	0xD0
-	movwf	POSTDEC0, A
 	
-	call	LCD_clear
-	
-	movlw	1
-	call	LCD_delay_ms
-	
-	movf	time_counter, W, A
-	call	LCD_Write_Hex_orig
+;	call	LCD_clear
+;	
+;	movlw	1
+;	call	LCD_delay_ms
+;	
+;	movf	time_counter, W, A
+;	call	LCD_Write_Hex_orig
 	
 	goto $
 	
