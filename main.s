@@ -28,9 +28,6 @@ start:
     
 loop:
 	
-	movlw	1
-	call	LCD_delay_x4us
-	
 	call	ADC_Read
 	movff	ADRESL, POSTINC0, A	;low bit to RAM, increment FSR0
 	movff	ADRESH, POSTINC0, A	;high bit to RAM, increment FSR0
