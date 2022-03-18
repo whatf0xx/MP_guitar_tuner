@@ -28,7 +28,7 @@ start:
     
 loop:
 	
-	movlw	5
+	movlw	1
 	call	LCD_delay_x4us
 	
 	call	ADC_Read
