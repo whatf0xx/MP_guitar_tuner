@@ -84,7 +84,7 @@ Div_loop:
 div_low:
 	movf	div_add_high, W, A	;high byte to W
 	cpfslt	ns_high, A		;is W > f?
-	bra	div_check_eq1		;NO, check equality
+	call	div_check_eq1		;NO, check equality
 	movff	div_add_low, num1L, A	;YES, find delta
 	movff	ns_low, num2L, A
 	call	sub_div
@@ -108,6 +108,13 @@ output:
 	call	LCD_clear
 	movlw	1
 	call	LCD_delay_ms
+	
+	movf	time_counter, W, A
+	call	LCD_Write_Hex_orig
+	
+	movlw	0xff
+	call	LCD_Write_Hex_orig
+	
 	movf	div_co, W, A
 	call	LCD_Write_Hex_orig
 	
