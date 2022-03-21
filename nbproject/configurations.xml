@@ -17,6 +17,7 @@
       <itemPath>LCD.s</itemPath>
       <itemPath>ACD.s</itemPath>
       <itemPath>timing.s</itemPath>
+      <itemPath>div_calcs.s</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
