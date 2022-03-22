@@ -18,13 +18,13 @@
       <itemPath>ACD.s</itemPath>
       <itemPath>timing.s</itemPath>
       <itemPath>div_calcs.s</itemPath>
+      <itemPath>UART.s</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
                    projectFiles="false">
       <itemPath>Makefile</itemPath>
     </logicalFolder>
-    <itemPath>UART.s</itemPath>
   </logicalFolder>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
