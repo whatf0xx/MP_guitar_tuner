@@ -1,7 +1,7 @@
 #include <xc.inc>
 
-;extrn	UART_Setup, UART_Transmit_Message  ; external uart subroutines
-extrn	LCD_Setup, LCD_Write_Message, LCD_Write_Hex, LCD_Write_Hex_orig, LCD_delay, LCD_clear, LCD_delay_ms, LCD_shift_cursor, LCD_delay_x4us, measure_loop ; external LCD subroutines
+extrn	UART_Setup, UART_Transmit_Message  ; external uart subroutines
+extrn	LCD_Setup, LCD_Write_Message, LCD_Write_Hex, LCD_Write_Hex_orig, LCD_Send_Byte_D, LCD_space, LCD_delay, LCD_clear, LCD_delay_ms, LCD_shift_cursor, LCD_delay_x4us, measure_loop ; external LCD subroutines
 extrn	ADC_Setup, ADC_Read, Mult_16_16, Mult_8_24, convert_voltage, convert_voltage_0A, convert		   ; external ADC subroutines
 extrn	ARG1L, ARG2L, ARG1H, ARG2H, RES0, RES1, RES2, RES3, ARG1M ;global variables from ADC
 extrn	timer_flag, time_counter, low_byte_thrsh, high_byte_thrsh
@@ -85,6 +85,8 @@ div_low:
 	movf	div_add_high, W, A	;high byte to W
 	cpfslt	ns_high, A		;is W > f?
 	call	div_check_eq1		;NO, check equality
+	clrf	num1L, A		;YES, find delta...
+	clrf	num2L, A		;...but first clear these variables
 	movff	div_add_low, num1L, A	;YES, find delta
 	movff	ns_low, num2L, A
 	call	sub_div
@@ -112,13 +114,27 @@ output:
 	movf	time_counter, W, A
 	call	LCD_Write_Hex_orig
 	
-	movlw	0xff
-	call	LCD_Write_Hex_orig
+	movlw	1
+	call	LCD_delay_ms
+	
+	;movlw	0x20			;print a space
+	;call	LCD_Send_Byte_D		; to LCD screen 
+	call	LCD_space
+	
+	movlw	1
+	call	LCD_delay_ms
 	
 	movf	div_co, W, A
 	call	LCD_Write_Hex_orig
 	
+	movlw	1
+	call	LCD_delay_ms
+	
 	call	LCD_shift_cursor
+	
+	movlw	1
+	call	LCD_delay_ms
+	
 	movf	delta, W, A
 	call	LCD_Write_Hex_orig
 	
