@@ -19,6 +19,7 @@ psect	udata_acs   ; reserve data space in access ram
 	ns_low:		ds 1
 	delta:		ds 1
 	
+	output_start	EQU 0x400
     
 psect	code, abs
 	
@@ -29,6 +30,7 @@ rst: 	org 0x0
 setup:	
 	call	LCD_Setup	; setup LCD
 	call	ADC_Setup	; setup ADC
+	call	UART_Setup
 
 	movlw	0
 	movwf	div_add_low, A	;start variable from 0 each run
@@ -107,47 +109,18 @@ div_check_low1:
 	return				;YES, finish loop
 
 output:
-	call	LCD_clear
-	movlw	1
-	call	LCD_delay_ms
 	
-	movf	time_counter, W, A
-	call	LCD_Write_Hex_orig
-	
-	movlw	1
-	call	LCD_delay_ms
-	
-	;movlw	0x20			;print a space
-	;call	LCD_Send_Byte_D		; to LCD screen 
-	call	LCD_space
-	
-	movlw	1
-	call	LCD_delay_ms
-	
-	movf	div_co, W, A
-	call	LCD_Write_Hex_orig
-	
-	movlw	1
-	call	LCD_delay_ms
-	
-	call	LCD_shift_cursor
-	
-	movlw	1
-	call	LCD_delay_ms
-	
-	movf	delta, W, A
-	call	LCD_Write_Hex_orig
-	
-	
-	
-	
-;	call	LCD_clear
+	;put our variables to FSR2
+;	lfsr	2, output_start
+;	movff	time_counter, POSTINC2, A
+;	movff	div_co, POSTINC2, A
+;	movff	delta, POSTINC2, A
 ;	
-;	movlw	1
-;	call	LCD_delay_ms
+;	lfsr	2, output_start
 ;	
-;	movf	time_counter, W, A
-;	call	LCD_Write_Hex_orig
+;	;use UART functions to send data to PC
+;	movlw	3
+;	call	UART_Transmit_Message
 	
 	goto $
 	
