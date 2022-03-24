@@ -1,7 +1,7 @@
 #include <xc.inc>
 
 ;***Import external routines and variables***
-extrn	UART_Setup, UART_Transmit_Message, hex_to_ascii_H, hex_to_ascii_L
+extrn	UART_Setup, UART_output, hex_to_ascii_H, hex_to_ascii_L
 extrn	LCD_Setup, LCD_Write_Message, LCD_Write_Hex, LCD_Write_Hex_orig
 extrn	LCD_space, LCD_clear, LCD_shift_cursor
 extrn	LCD_delay, LCD_delay_ms, LCD_delay_x4us
@@ -13,7 +13,6 @@ extrn	timing_setup, is_low, is_high
 psect	udata_acs
 	
 	raw_store	EQU 0x100	;where to store sound data
-	output_start	EQU 0x400	;where to store UART output
 	counter:	ds 1		;for data acquisition loop
 	run_counter:	ds 1
 	run_low:	ds 1
@@ -59,28 +58,8 @@ timing:
 	call	is_high			;finish when the timer goes high again
 	
 output:
-	lfsr	2, output_start		;UART sends from FSR2
-	
 	movf	time_counter, W, A
-	call	hex_to_ascii_H		;find the ascii for high bit
-	movwf	POSTINC2, A
-	
-	movf	time_counter, W, A	;find the ascii for low bit
-	call	hex_to_ascii_L
-	movwf	POSTINC2, A
-	
-	
-	movlw	10			;ascii for new line
-	movwf	POSTINC2, A
-	
-	movlw	13			;ascii for carriage return
-	movwf	POSTINC2, A
-	
-	lfsr	2, output_start		;ready to send message
-	
-	;use UART functions to send data to PC
-	movlw	4
-	call	UART_Transmit_Message
+	call	UART_output
 	
 	goto	start			;loop
 	

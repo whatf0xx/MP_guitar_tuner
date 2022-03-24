@@ -1,11 +1,13 @@
 #include <xc.inc>
     
-global  UART_Setup, UART_Transmit_Message, output_var, hex_to_ascii, hex_to_ascii_H, hex_to_ascii_L
+global  UART_Setup, UART_Transmit_Message, output_var, hex_to_ascii, hex_to_ascii_H, hex_to_ascii_L, UART_output
 
 psect	udata_acs   ; reserve data space in access ram
-UART_counter: ds    1	    ; reserve 1 byte for variable UART_counter
-output_var:   ds    1	    ; output variiable to be converted to ascii representation of hex number
-hex_thresh:    ds    1	    ; 
+output_start	EQU 0x400	;where to store UART output
+UART_counter: ds 1	    ; reserve 1 byte for variable UART_counter
+output_var:   ds 1	    ; output variiable to be converted to ascii representation of hex number
+hex_thresh:   ds 1	    
+to_output:    ds 1
 
 psect	uart_code,class=CODE
 UART_Setup:
@@ -82,6 +84,33 @@ hex_to_ascii_L:
     addlw	0x07			    ; NO, nibble is greater than 10 so it is a hex letter, so add 0x37(=0x0A + 0x07 + 0x26)
     addlw	0x26			    ; YES, nibble is a hex number, so add 0x30(=0x0A + 0x26)
     addwf	output_var, W, A	    ; move result to W
+    return
+    
+UART_output:
+    movwf	to_output, A
+    
+    lfsr	2, output_start		;UART sends from FSR2
+	
+    movf	to_output, W, A
+    call	hex_to_ascii_H		;find the ascii for high bit
+    movwf	POSTINC2, A
+
+    movf	to_output, W, A	;find the ascii for low bit
+    call	hex_to_ascii_L
+    movwf	POSTINC2, A
+
+
+    movlw	10			;ascii for new line
+    movwf	POSTINC2, A
+
+    movlw	13			;ascii for carriage return
+    movwf	POSTINC2, A
+
+    lfsr	2, output_start		;ready to send message
+
+    ;use UART functions to send data to PC
+    movlw	4
+    call	UART_Transmit_Message
     return
 
 end
