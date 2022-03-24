@@ -42,8 +42,8 @@ is_low:
 	
 check_eq1:
 	cpfsgt	high_byte_thrsh, A	;is W < f?
-	bra	check_low1		;it's equal - check the low byte
-	decf	FSR0, A			;it's lower - leave the loop
+	bra	check_low1		;NO, it's equal - check the low byte
+	decf	FSR0, A			;YES, it's lower - leave the loop
 	return
 	
 check_low1:
