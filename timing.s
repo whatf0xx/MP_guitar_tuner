@@ -5,8 +5,6 @@ global timing_setup, is_high, is_low
     
 psect timing_vars, class=DATA
     
-    ; These are for the timing-loop process
-    
 	raw_end	    EQU 0x2ff
 	timer_flag:	    ds 1
 	time_counter:	    ds 1
@@ -42,8 +40,8 @@ is_low:
 	
 check_eq1:
 	cpfsgt	high_byte_thrsh, A	;is W < f?
-	bra	check_low1		;it's equal - check the low byte
-	decf	FSR0, A			;it's lower - leave the loop
+	bra	check_low1		;NO, it's equal - check the low byte
+	decf	FSR0, A			;YES, it's lower - leave the loop
 	return
 	
 check_low1:

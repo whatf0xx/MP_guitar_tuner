@@ -36,6 +36,7 @@ fig = plt.figure()
 ax = plt.axes()
 
 ax.plot(t_estimate, combined_data)
+#ax.hlines(1000, 0, 5, linestyle='dashed')
 ax.set_xlabel("Time (ms)")
 ax.set_ylabel("Amplitude (a.u.)")
 
