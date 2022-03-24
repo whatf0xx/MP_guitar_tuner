@@ -14,8 +14,7 @@ psect	udata_acs
 	
 	raw_store	EQU 0x100	;where to store sound data
 	counter:	ds 1		;for data acquisition loop
-	run_counter:	ds 1
-	run_low:	ds 1
+	accept:		ds 1		;is the measurement sensical?
 	
 ;***Reserve space for and write code***
 psect	code, abs
@@ -27,9 +26,9 @@ setup:
 	call	LCD_Setup	
 	call	ADC_Setup	
 	call	UART_Setup
-
-	movlw	5
-	movwf	run_counter, A
+	
+	movlw	0x30
+	movwf	accept, A		;minimum value to accept as result
 	
 	goto	start
 
@@ -57,8 +56,15 @@ timing:
 	call	is_low			;timer increments on each loop
 	call	is_high			;finish when the timer goes high again
 	
+analysis:
+	movf	time_counter, W, A
+	cpfslt	accept, A		;is the measurement acceptable?
+	goto	start			;NO, start again
+	
+
 output:
 	movf	time_counter, W, A
+	movlw	0x69
 	call	UART_output
 	
 	goto	start			;loop
