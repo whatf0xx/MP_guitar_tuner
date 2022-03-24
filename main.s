@@ -18,6 +18,8 @@ psect	udata_acs   ; reserve data space in access ram
 	ns_high:	ds 1
 	ns_low:		ds 1
 	delta:		ds 1
+	run_counter:	ds 1
+	run_low:	ds 1
 	
 	output_start	EQU 0x400
     
@@ -32,19 +34,16 @@ setup:
 	call	ADC_Setup	; setup ADC
 	call	UART_Setup
 
-	movlw	0
-	movwf	div_add_low, A	;start variable from 0 each run
-	movwf	div_add_high, A
-	movwf	div_co, A
-	
-	movlw	0x76		; setting up the sampling rate
-	movwf	ns_high, A
-	movlw	0x5F
-	movwf	ns_low, A
+	movlw	5
+	movwf	run_counter, A
 	
 	goto	start
 	
 	; ******* Main programme ****************************************
+rset:
+	movlw	0
+	movwf	run_low, A
+
 start:
 	lfsr	0, raw_store	    ;store bits of raw data
     
@@ -69,64 +68,12 @@ meas_loop:
 	call	is_low			;timer increments on each loop
 	call	is_high			;finish when the timer goes high again
 	
-Div_loop:
-  
-    
-	; Setting up the variables to be used by div_add
-	movff	div_add_high, num1H, A
-	movff	div_add_low, num1L, A
-	movff	time_counter, num2L, A
-	; add
-	call	add_div
-	movff	resH, div_add_high, A	;relabel so that they can
-	movff	resL, div_add_low, A	; be used by the loop again
-	
-	incf	div_co, A		;increment div_counter (m)
-
-	; need to do comparison - is div_add greater than ns?
-div_low:
-	movf	div_add_high, W, A	;high byte to W
-	cpfslt	ns_high, A		;is W > f?
-	call	div_check_eq1		;NO, check equality
-	clrf	num1L, A		;YES, find delta...
-	clrf	num2L, A		;...but first clear these variables
-	movff	div_add_low, num1L, A	;YES, find delta
-	movff	ns_low, num2L, A
-	call	sub_div
-	movff	resL, delta, A
-	goto	output
-	
-	
-	
-div_check_eq1:
-	cpfsgt	ns_high, A		;is W < f?
-	bra	div_check_low1		;it's equal - check the low byte
-	return				;it's lower - leave the loop
-	
-div_check_low1:
-	movf	div_add_low, W, A	;low byte to W
-	cpfslt	ns_low, A		;is W > f?
-	bra	Div_loop		;NO, add again
-	return				;YES, finish loop
-
 output:
 	
 	;put our variables to FSR2
 	;NB they need to be ascii vals!
 	lfsr	2, output_start
 	
-;	movff	time_counter, output_var, A
-;	call	hex_to_ascii
-	
-;	movlw	0xF0			    ; select high nibble
-;	andwf	time_counter, W, A	    ; high nibble of variable stored in W
-;	addlw	0x30			    ; add 0x30 to convert to ascii and store in W
-;	movwf	POSTINC2, A		    ; move to FSR2 to be transmitted via UART
-;	movlw	0x0F			    ; select low nibble
-;	andwf	time_counter, W, A	    ; low nibble of variable stored in W
-;	addlw	0x30			    ; add 0x30 to convert to ascii and store in W
-;	movwf	POSTINC2, A		    ; move to FSR2 to be transmitted via UART
-	
 	movf	time_counter, W, A
 	call	hex_to_ascii_H
 	movwf	POSTINC2, A
@@ -135,55 +82,24 @@ output:
 	movwf	POSTINC2, A
 	
 	
-	movlw	0x20			    ; ascii for space
-	movwf	POSTINC2, A
-	
-	movf	div_co, W, A
-	call	hex_to_ascii_H
-	movwf	POSTINC2, A
-	movf	div_co, W, A
-	call	hex_to_ascii_L
-	movwf	POSTINC2, A
-	
-	movlw	0x20			    ; ascii for space
-	movwf	POSTINC2, A
-	
-	movf	delta, W, A
-	call	hex_to_ascii_H
-	movwf	POSTINC2, A
-	movf	delta, W, A
-	call	hex_to_ascii_L
-	movwf	POSTINC2, A
-	
-	
-	movlw	10			    ; ascii for carriage return
+	movlw	10			    ; ascii for new line
 	movwf	POSTINC2, A
 	
 	movlw	13			    ; ascii for carriage return
 	movwf	POSTINC2, A
 	
-;	movlw	0x30
-;	addwf	time_counter, F, A
-;	movff	time_counter, POSTINC2, A
-;	movlw	0x20
-;	movwf	POSTINC2, A
-;	movlw	0x30
-;	addwf	div_co, F, A
-;	movff	div_co, POSTINC2, A
-;	movlw	0x20
-;	movwf	POSTINC2, A
-;	movlw	0x30
-;	addwf	delta, F, A
-;	movff	delta, POSTINC2, A
-;	movlw	0x0D
-;	movwf	POSTINC2, A
-	
 	lfsr	2, output_start
 	
 	;use UART functions to send data to PC
-	movlw	10
+	movlw	4
 	call	UART_Transmit_Message
 	
-	goto $
+;	decfsz	run_low
+;	goto	start
+;	
+;	decfsz	run_counter
+;	goto	rset
+	
+	goto	start
 	
 	end	rst
