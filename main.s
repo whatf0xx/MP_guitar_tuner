@@ -61,10 +61,13 @@ analysis:
 	cpfslt	accept, A		;is the measurement acceptable?
 	goto	start			;NO, start again
 	
+	;Take 10 measurements, for each,
+	;bin into SHARP, FLAT or 
+	;ON-PITCH. Output largest
+	
 
 output:
 	movf	time_counter, W, A
-	movlw	0x69
 	call	UART_output
 	
 	goto	start			;loop
