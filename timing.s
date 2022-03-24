@@ -5,8 +5,6 @@ global timing_setup, is_high, is_low
     
 psect timing_vars, class=DATA
     
-    ; These are for the timing-loop process
-    
 	raw_end	    EQU 0x2ff
 	timer_flag:	    ds 1
 	time_counter:	    ds 1
