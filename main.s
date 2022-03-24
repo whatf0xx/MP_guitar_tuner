@@ -48,6 +48,7 @@ setup:
 start:
 	lfsr	0, raw_store	    ;store bits of raw data
     
+
 meas_loop:
 	
 	call	ADC_Read
