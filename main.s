@@ -158,6 +158,9 @@ output:
 	movlw	10			    ; ascii for carriage return
 	movwf	POSTINC2, A
 	
+	movlw	13			    ; ascii for carriage return
+	movwf	POSTINC2, A
+	
 ;	movlw	0x30
 ;	addwf	time_counter, F, A
 ;	movff	time_counter, POSTINC2, A
@@ -177,7 +180,7 @@ output:
 	lfsr	2, output_start
 	
 	;use UART functions to send data to PC
-	movlw	9
+	movlw	10
 	call	UART_Transmit_Message
 	
 	goto $
