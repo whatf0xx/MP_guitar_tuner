@@ -45,8 +45,9 @@
     sub_step2:
     
 	movlw	0x00
-	subfwb	resL, W, A	; 0-resL (W-f), store in W
-	movwf	resL, A		; move result from W to resL
+	;subfwb	resL, W, A	; 0-resL (W-f), store in W
+	;movwf	resL, A		; move result from W to resL
+	subfwb	resL, F, A	; 0-resL (W-f), store in F
 	return
 ;add_div_test:
 	

@@ -1,6 +1,6 @@
 #include <xc.inc>
 
-extrn	UART_Setup, UART_Transmit_Message  ; external uart subroutines
+extrn	UART_Setup, UART_Transmit_Message, output_var, hex_to_ascii, hex_to_ascii_H, hex_to_ascii_L  ; external uart subroutines
 extrn	LCD_Setup, LCD_Write_Message, LCD_Write_Hex, LCD_Write_Hex_orig, LCD_Send_Byte_D, LCD_space, LCD_delay, LCD_clear, LCD_delay_ms, LCD_shift_cursor, LCD_delay_x4us, measure_loop ; external LCD subroutines
 extrn	ADC_Setup, ADC_Read, Mult_16_16, Mult_8_24, convert_voltage, convert_voltage_0A, convert		   ; external ADC subroutines
 extrn	ARG1L, ARG2L, ARG1H, ARG2H, RES0, RES1, RES2, RES3, ARG1M ;global variables from ADC
@@ -19,6 +19,7 @@ psect	udata_acs   ; reserve data space in access ram
 	ns_low:		ds 1
 	delta:		ds 1
 	
+	output_start	EQU 0x400
     
 psect	code, abs
 	
@@ -29,6 +30,7 @@ rst: 	org 0x0
 setup:	
 	call	LCD_Setup	; setup LCD
 	call	ADC_Setup	; setup ADC
+	call	UART_Setup
 
 	movlw	0
 	movwf	div_add_low, A	;start variable from 0 each run
@@ -107,47 +109,76 @@ div_check_low1:
 	return				;YES, finish loop
 
 output:
-	call	LCD_clear
-	movlw	1
-	call	LCD_delay_ms
+	
+	;put our variables to FSR2
+	;NB they need to be ascii vals!
+	lfsr	2, output_start
+	
+;	movff	time_counter, output_var, A
+;	call	hex_to_ascii
+	
+;	movlw	0xF0			    ; select high nibble
+;	andwf	time_counter, W, A	    ; high nibble of variable stored in W
+;	addlw	0x30			    ; add 0x30 to convert to ascii and store in W
+;	movwf	POSTINC2, A		    ; move to FSR2 to be transmitted via UART
+;	movlw	0x0F			    ; select low nibble
+;	andwf	time_counter, W, A	    ; low nibble of variable stored in W
+;	addlw	0x30			    ; add 0x30 to convert to ascii and store in W
+;	movwf	POSTINC2, A		    ; move to FSR2 to be transmitted via UART
 	
 	movf	time_counter, W, A
-	call	LCD_Write_Hex_orig
+	call	hex_to_ascii_H
+	movwf	POSTINC2, A
+	movf	time_counter, W, A
+	call	hex_to_ascii_L
+	movwf	POSTINC2, A
 	
-	movlw	1
-	call	LCD_delay_ms
 	
-	;movlw	0x20			;print a space
-	;call	LCD_Send_Byte_D		; to LCD screen 
-	call	LCD_space
-	
-	movlw	1
-	call	LCD_delay_ms
+	movlw	0x20			    ; ascii for space
+	movwf	POSTINC2, A
 	
 	movf	div_co, W, A
-	call	LCD_Write_Hex_orig
+	call	hex_to_ascii_H
+	movwf	POSTINC2, A
+	movf	div_co, W, A
+	call	hex_to_ascii_L
+	movwf	POSTINC2, A
 	
-	movlw	1
-	call	LCD_delay_ms
-	
-	call	LCD_shift_cursor
-	
-	movlw	1
-	call	LCD_delay_ms
+	movlw	0x20			    ; ascii for space
+	movwf	POSTINC2, A
 	
 	movf	delta, W, A
-	call	LCD_Write_Hex_orig
+	call	hex_to_ascii_H
+	movwf	POSTINC2, A
+	movf	delta, W, A
+	call	hex_to_ascii_L
+	movwf	POSTINC2, A
 	
 	
+	movlw	10			    ; ascii for carriage return
+	movwf	POSTINC2, A
 	
+;	movlw	0x30
+;	addwf	time_counter, F, A
+;	movff	time_counter, POSTINC2, A
+;	movlw	0x20
+;	movwf	POSTINC2, A
+;	movlw	0x30
+;	addwf	div_co, F, A
+;	movff	div_co, POSTINC2, A
+;	movlw	0x20
+;	movwf	POSTINC2, A
+;	movlw	0x30
+;	addwf	delta, F, A
+;	movff	delta, POSTINC2, A
+;	movlw	0x0D
+;	movwf	POSTINC2, A
 	
-;	call	LCD_clear
-;	
-;	movlw	1
-;	call	LCD_delay_ms
-;	
-;	movf	time_counter, W, A
-;	call	LCD_Write_Hex_orig
+	lfsr	2, output_start
+	
+	;use UART functions to send data to PC
+	movlw	9
+	call	UART_Transmit_Message
 	
 	goto $
 	
