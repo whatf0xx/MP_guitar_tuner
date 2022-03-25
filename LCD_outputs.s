@@ -24,13 +24,13 @@ Sharp_word:
     align	2
     
 On_word:
-    db		'O','n',' ','p','i','t','c','h'
+    db		'O','n',' ','P','i','t','c','h'
     o_length	EQU 8
     align	2
     
 Flash_setup:
-    bcf		CFGS
-    bsf		EEPGD
+    bcf		CFGS		; Point to Flash programme memory
+    bsf		EEPGD		; access Flash programme memory
     return
 
 ;******************************************************************************

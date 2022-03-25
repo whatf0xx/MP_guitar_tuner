@@ -23,6 +23,7 @@ psect	udata_acs
 	on_bin:		ds 1		;known pitch of a4
     
 	a_count:	ds 1		;counter for the analysis loop
+	diff_thrsh:	ds 1		;threshold before assume on pitch
 	
 ;***Reserve space for and write code***
 psect	code, abs
@@ -41,6 +42,9 @@ setup:
 	
 	movlw	0x30
 	movwf	accept, A		;minimum value to accept as result
+	
+	movlw	10
+	movwf	diff_thrsh, A		;if bins within 10, assume equal
 
 bin_reset:
 	movlw	0
@@ -48,7 +52,7 @@ bin_reset:
 	movwf	flat_bin, A
 	movwf	on_bin, A
 	
-	movlw	50			;number of measurements for decision
+	movlw	60			;number of measurements for decision
 	movwf	a_count, A
 
 start:
@@ -115,14 +119,25 @@ output:
 	cpfslt	sharp_bin, A		;More ons than sharps?
 	bra	is_sharp		;NO, is it sharp?
 	cpfslt	flat_bin, A		;YES, more ons than flats?
-	bra	flat			;NO, must be flat
+	bra	flat			;NO, must be flat or about the same
 	bra	on_pitch		;YES, run code to display ON-PITCH
 	
 is_sharp:
 	movf	sharp_bin, W, A
 	cpfslt	flat_bin, A	    	;More sharp than flats?
-	bra	flat			;NO, it must be flat
-	bra	sharp			;YES, it must be sharp
+	bra	flat			;NO, it might be flat or about on
+	movf	flat_bin, W, A		;YES, flats are smaller
+	subwf	sharp_bin, W, A		;do sharps - flats
+	cpfslt	diff_thrsh		;is diff > thrsh?
+	bra	on_pitch		;NO, they're about the same
+	bra	sharp			;YES, its must be sharp
+	
+is_flat:
+	movf	sharp_bin, W, A		;YES, sharps are smaller
+	subwf	flat_bin, W, A		;do flats - sharps
+	cpfslt	diff_thrsh		;is diff > thrsh?
+	bra	on_pitch		;NO, they're about the same
+	bra	flat			;YES, it must be flat
 	
 on_pitch:
 	call	output_on
