@@ -7,7 +7,7 @@ Created on Mon May 20 12:00:18 2019
 
 import numpy as np
 
-raw_data = np.loadtxt("./Final_data/Unfiltered_sine.txt", dtype=str)
+raw_data = np.loadtxt("./Final_data/440_waveform.txt", dtype=str)
 flattened_data = np.zeros(np.size(raw_data))
 
 for i, d in enumerate(raw_data):
@@ -35,7 +35,7 @@ import matplotlib.pyplot as plt
 fig = plt.figure()
 ax = plt.axes()
 
-ax.plot(t_estimate, combined_data)
+ax.plot(t_estimate, combined_data, 'b.')
 #ax.hlines(1000, 0, 5, linestyle='dashed')
 ax.set_xlabel("Time (ms)")
 ax.set_ylabel("Amplitude (a.u.)")
