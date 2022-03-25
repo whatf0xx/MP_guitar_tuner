@@ -8,6 +8,7 @@ extrn	LCD_delay, LCD_delay_ms, LCD_delay_x4us
 extrn	ADC_Setup, ADC_Read
 extrn	timer_flag, time_counter, low_byte_thrsh, high_byte_thrsh
 extrn	timing_setup, is_low, is_high
+extrn	output_sharp, output_flat, output_on, Flash_setup
 	
 ;***Reserve space in access RAM for variables ad define names***
 psect	udata_acs
@@ -33,6 +34,7 @@ setup:
 	call	LCD_Setup	
 	call	ADC_Setup	
 	call	UART_Setup
+	call	Flash_setup
 	
 	movlw	70			;measured value for a4
 	movwf	a4, A
@@ -46,7 +48,7 @@ bin_reset:
 	movwf	flat_bin, A
 	movwf	on_bin, A
 	
-	movlw	100			;number of measurements for decision
+	movlw	50			;number of measurements for decision
 	movwf	a_count, A
 
 start:
@@ -107,7 +109,7 @@ output:
 	movf	time_counter, W, A	;output time_counter to UART
 	call	UART_output
 	
-	;clear the LCD screen
+	call	LCD_clear
 	
 	movf	on_bin, W, A
 	cpfslt	sharp_bin, A		;More ons than sharps?
@@ -123,15 +125,15 @@ is_sharp:
 	bra	sharp			;YES, it must be sharp
 	
 on_pitch:
-	;display ON-PITCH on LCD
+	call	output_on
 	goto	bin_reset
 	
 flat:
-	;display FLAT on LCD
+	call	output_flat
 	goto	bin_reset
 	
 sharp:
-	;display SHARP on LCD
+	call	output_sharp
 	goto	bin_reset
 	
 	

@@ -72,10 +72,10 @@ LCD_Hex_Nib:			; writes low nibble as hex character
 	call	LCD_Send_Byte_D ; write out ascii
 	return	
 	
-LCD_Write_Message:	    ; Message stored at FSR2, length stored in W
+LCD_Write_Message:	    ; Message stored at FSR1, length stored in W
 	movwf   LCD_counter, A
 LCD_Loop_message:
-	movf    POSTINC2, W, A
+	movf    POSTINC1, W, A
 	call    LCD_Send_Byte_D
 	decfsz  LCD_counter, A
 	bra	LCD_Loop_message
