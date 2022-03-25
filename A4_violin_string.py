@@ -7,7 +7,7 @@ Created on Mon May 20 12:00:18 2019
 
 import numpy as np
 
-raw_data = np.loadtxt("./violin_A4(1).txt", dtype=str)
+raw_data = np.loadtxt("./Final_data/Unfiltered_sine.txt", dtype=str)
 flattened_data = np.zeros(np.size(raw_data))
 
 for i, d in enumerate(raw_data):
