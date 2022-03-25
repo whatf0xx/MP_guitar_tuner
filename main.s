@@ -110,8 +110,10 @@ output:
 	;clear the LCD screen
 	
 	movf	on_bin, W, A
-	cpfslt	sharp_bin, A		;More ons than anything else?
+	cpfslt	sharp_bin, A		;More ons than sharps?
 	bra	is_sharp		;NO, is it sharp?
+	cpfslt	flat_bin, A		;YES, more ons than flats?
+	bra	flat			;NO, must be flat
 	bra	on_pitch		;YES, run code to display ON-PITCH
 	
 is_sharp:
