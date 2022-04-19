@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
-
 """
-Created on Mon May 20 12:00:18 2019
+Created on Tue Apr 19 15:43:09 2022
+
 @author: whatf
 """
 
 import numpy as np
 
-raw_data = np.loadtxt("./Final_data/Unfiltered_violin.txt", dtype=str)
+raw_data = np.loadtxt("./Final_data/Unfiltered_sine.txt", dtype=str)
 flattened_data = np.zeros(np.size(raw_data))
 
 for i, d in enumerate(raw_data):
@@ -35,23 +35,16 @@ import matplotlib.pyplot as plt
 fig = plt.figure(figsize=(3.5, 2.1))
 ax = plt.axes()
 
-ax.plot(t_estimate, combined_data, 'b.', linestyle="dashed", markersize=3.0)
+ax.set_xlim(5, 8.4)
+ax.plot(t_estimate, combined_data, 'b.', markersize=2.6)
 ax.hlines(1000, -0.1, 8.4, linestyle='dashed')
-#ax.hlines(1000, 0, 5, linestyle='dashed')
-ax.set_xlabel("Time (ms)")
-ax.set_ylabel("Amplitude (a.u.)")
+ax.vlines((t_estimate[176], t_estimate[247]), [600, 600], [1400, 1400],
+          linestyle="dashed", color="#dd3333")
 
-# from scipy.fftpack import fft, fftshift
-
-# fig = plt.figure()
-# ax = plt.axes()
-
-# fft_data = fftshift(fft(combined_data))
-# sampling_rate = 30303
-# freq = 0.5 * sampling_rate * np.linspace(-1.0, 1.0, len(combined_data))
-
-# ax.plot(freq, abs(fft_data))
-# ax.set_xlim(-100, 5000)
-
+ax.text(7.78, 1045, "(A)")
+ax.text(6.72, 885, "(B)")
+ax.text(5.48, 1045, "(C)")
+ax.set_xlabel("Time (ms)", labelpad=2)
+ax.set_ylabel("Amplitude (a.u.)", labelpad=2)
 fig.tight_layout(rect=(0, 0, 0.98, 0.98), pad=0.1)
-fig.savefig("unfiltered-violin-form.eps")
+fig.savefig("period-finding.eps")
