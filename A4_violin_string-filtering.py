@@ -32,13 +32,7 @@ t_estimate = 0.0325 * np.arange(0, 256, 1) #time, ms
 
 import matplotlib.pyplot as plt
 
-fig, ax = plt.subplots(3, 1, figsize=(3.4, 7.0))
-
-ax[0].plot(t_estimate, combined_data, 'b.', linestyle="dashed", markersize=3.0)
-ax[0].hlines(1000, -0.1, 8.4, linestyle='dashed')
-#ax.hlines(1000, 0, 5, linestyle='dashed')
-ax[0].set_xlabel("Time (ms)")
-ax[0].set_ylabel("Amplitude (a.u.)")
+fig, ax = plt.subplots(2, 1, figsize=(3.5, 4.8))
 
 from scipy.fftpack import fft, fftshift
 
@@ -47,13 +41,13 @@ fft_data = fftshift(fft(cheat_data))
 sampling_rate = 30800
 freq = 0.5 * sampling_rate * np.linspace(-1.0, 1.0, 50*len(combined_data[34:106]))
 
-ax[1].plot(freq, abs(fft_data))
-ax[1].set_xlim(000, 1500)
-ax[1].set_ylim(0, 1e6)
-ax[1].vlines(480, 0, 1e6, linestyle="dashed", color="#dd3333")
+ax[0].plot(freq, abs(fft_data), label="Unfiltered")
+ax[0].set_xlim(000, 1500)
+ax[0].set_ylim(0, 1e6)
+ax[0].vlines(480, 0, 1e6, linestyle="dashed", color="#dd3333", label="Cut-off frequency")
 
-ax[1].set_xlabel("Frequency (Hz)")
-ax[1].set_ylabel("Fourier amplitude (a.u.)")
+ax[0].set_xlabel("Frequency (Hz)")
+ax[0].set_ylabel("Fourier amplitude (a.u.)")
 
 
 
@@ -72,10 +66,18 @@ combined_data = np.zeros(256)
 for i in range(256):
     combined_data[i] = flattened_data[2*i] + flattened_data[2*i + 1]
     
-ax[2].plot(t_estimate, combined_data, 'b.', linestyle="dashed", markersize=3.0)
-ax[2].hlines(1000, -0.1, 8.4, linestyle='dashed')
+ax[1].plot(t_estimate, combined_data, 'b.', linestyle="dashed", markersize=3.0)
+ax[1].hlines(1000, -0.1, 8.4, linestyle='dashed')
 #ax.hlines(1000, 0, 5, linestyle='dashed')
-ax[2].set_xlabel("Time (ms)")
-ax[2].set_ylabel("Amplitude (a.u.)")
+ax[1].set_xlabel("Time (ms)")
+ax[1].set_ylabel("Amplitude (a.u.)")
 
+cheat_data = np.array(50 * list(combined_data[33:106]))
+fft_data = fftshift(fft(cheat_data))
+sampling_rate = 30800
+freq = 0.5 * sampling_rate * np.linspace(-1.0, 1.0, 50*len(combined_data[33:106]))
+
+ax[0].plot(freq, abs(fft_data), label="Filtered")
+ax[0].legend()
 fig.tight_layout(rect=(0,0,0.98,0.98), pad=0.1)
+fig.savefig("Filtering.eps")
